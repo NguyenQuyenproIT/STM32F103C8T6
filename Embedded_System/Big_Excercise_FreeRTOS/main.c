@@ -1,7 +1,7 @@
 #include "stm32f10x.h"                  // Device header
 #include "stm32f10x_gpio.h"
 #include "stm32f10x_rcc.h"
-#include "uart1.h"
+#include "stm32f10x_usart.h"
 #include "FreeRTOS.h"                   // ARM.FreeRTOS::RTOS:Core
 #include "task.h"                       // ARM.FreeRTOS::RTOS:Core
 #include "queue.h"                      // ARM.FreeRTOS::RTOS:Core
@@ -26,6 +26,47 @@ void Config_LED(){
 	GPIO_Init(GPIOA, &gpio_init);
 }
 
+void PIN_MODE_UART1(){
+		
+		GPIO_InitTypeDef gpio_pin;
+		USART_InitTypeDef usart_init;
+		NVIC_InitTypeDef NVIC_InitStructure;
+
+	
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+	
+	// pin USART
+		gpio_pin.GPIO_Pin = GPIO_Pin_9;
+		gpio_pin.GPIO_Mode = GPIO_Mode_AF_PP;
+		gpio_pin.GPIO_Speed = GPIO_Speed_50MHz; // TX
+		GPIO_Init(GPIOA, &gpio_pin);
+	
+		gpio_pin.GPIO_Pin = GPIO_Pin_10;
+		gpio_pin.GPIO_Mode = GPIO_Mode_IN_FLOATING; // RX
+		gpio_pin.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOA, &gpio_pin);
+	
+		usart_init.USART_BaudRate = 115200;
+		usart_init.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+		usart_init.USART_WordLength = USART_WordLength_8b;
+		usart_init.USART_StopBits = USART_StopBits_1;
+		usart_init.USART_Parity = USART_Parity_No;
+		usart_init.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+			
+		
+		USART_Init(USART1, &usart_init); // configure to register: Baudrate, Word length, Parity, Stop bit, Flow control, Mode… but still not turn on USART.
+			
+			USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); // enable ngat RXNE
+			USART_Cmd(USART1, ENABLE); // bat bo USART. -> complete
+			
+		//	NVIC_EnableIRQ(USART1_IRQn);
+	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);		
+}	
 
 void USART1_IRQHandler() {
     if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) {
@@ -57,7 +98,6 @@ typedef enum {
 // -------------------- Task 1: Nh?n chu?i --------------------
 void Task_UART_Receive(void *pvParameters) {
     char buffer[MAX];
-  //  USART1_SendString("Task_UART_Receive started\r\n");
 
     while (1) {
         if (vri_Stt == 1) {
@@ -146,3 +186,4 @@ int main(void) {
 
     while (1);
 }
+
