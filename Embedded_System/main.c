@@ -10,9 +10,9 @@
 
 #define MAX 100
 
-// -------------------- Bi?n volatile chia s? gi?a ISR và Task --------------------
+// -------------------- Bi?n volatile chia s? gi?a ISR vÃ  Task --------------------
 volatile char vrc_Getc;
-volatile char vrc_Res[MAX];  // m?ng luu chu?i nh?p vào
+volatile char vrc_Res[MAX];  // m?ng luu chu?i nh?p vÃ o
 volatile int vri_Count = 0;
 volatile int vri_Stt = 0;
 
@@ -29,7 +29,7 @@ typedef enum {
     CMD_TOGGLE
 } Command_t;
 
-// -------------------- Hàm UART --------------------
+// -------------------- HÃ m UART --------------------
 void USART1_SendString(char *s) {
     while (*s) {
         USART_SendData(USART1, (uint8_t)(*s++));
@@ -164,7 +164,7 @@ void Task_Check_Command(void *pvParameters) {
     }
 }
 
-// -------------------- Task 4: Ði?u khi?n GPIO --------------------
+// -------------------- Task 4: Ãi?u khi?n GPIO --------------------
 void Task_GPIO_Control(void *pvParameters) {
     Command_t cmd;
     USART1_SendString("Task_GPIO_Control started\r\n");
@@ -172,8 +172,8 @@ void Task_GPIO_Control(void *pvParameters) {
     while (1) {
         if (xQueueReceive(xQueueAction, &cmd, portMAX_DELAY) == pdTRUE) {
             switch (cmd) {
-                case CMD_ON:    GPIO_SetBits(GPIOA, GPIO_Pin_0); break;
-                case CMD_OFF:   GPIO_ResetBits(GPIOA, GPIO_Pin_0); break;
+               case CMD_ON:    GPIO_ResetBits(GPIOA, GPIO_Pin_0); break;
+                case CMD_OFF:   GPIO_SetBits(GPIOA, GPIO_Pin_0); break;
                 case CMD_TOGGLE: GPIOA->ODR ^= GPIO_Pin_0; break;
                 default: break;
             }
@@ -212,3 +212,4 @@ int main(void) {
 
     while (1);
 }
+
