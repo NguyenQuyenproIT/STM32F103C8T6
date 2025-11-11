@@ -3,8 +3,42 @@
 #include "stm32f10x_rcc.h"              // Keil::Device:StdPeriph Drivers:RCC
 #include "stm32f10x_tim.h"              // Keil::Device:StdPeriph Drivers:TIM
 #include "stm32f10x_usart.h"            // Keil::Device:StdPeriph Drivers:USART
-#include "uart1.h"
 #include "stdio.h"
+
+void PIN_MODE_UART1(){
+		
+		GPIO_InitTypeDef gpio_pin;
+		USART_InitTypeDef usart_init;
+		NVIC_InitTypeDef NVIC_InitStructure;
+
+	
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+		RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+	
+	// pin USART
+		gpio_pin.GPIO_Pin = GPIO_Pin_9;
+		gpio_pin.GPIO_Mode = GPIO_Mode_AF_PP;
+		gpio_pin.GPIO_Speed = GPIO_Speed_50MHz; // TX
+		GPIO_Init(GPIOA, &gpio_pin);
+	
+		gpio_pin.GPIO_Pin = GPIO_Pin_10;
+		gpio_pin.GPIO_Mode = GPIO_Mode_IN_FLOATING; // RX
+		gpio_pin.GPIO_Speed = GPIO_Speed_50MHz;
+		GPIO_Init(GPIOA, &gpio_pin);
+	
+			usart_init.USART_BaudRate = 115200;
+			usart_init.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+			usart_init.USART_WordLength = USART_WordLength_8b;
+			usart_init.USART_StopBits = USART_StopBits_1;
+			usart_init.USART_Parity = USART_Parity_No;
+			usart_init.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+			
+		
+		USART_Init(USART1, &usart_init); // configure to register: Baudrate, Word length, Parity, Stop bit, Flow control, Mode‚Ä¶ but still not turn on USART.
+			
+			USART_ITConfig(USART1, USART_IT_RXNE, ENABLE); // enable ngat RXNE
+			USART_Cmd(USART1, ENABLE); // bat bo USART. -> complete
+}
 
 void config_TIMER_PWM(){
 	
@@ -19,14 +53,14 @@ void config_TIMER_PWM(){
 			gpio_init.GPIO_Speed = GPIO_Speed_50MHz;
 			GPIO_Init(GPIOA, &gpio_init);
 
-			// 3. Cau hÏnh Time Base (f = 1 kHz)
+			// 3. Cau h√¨nh Time Base (f = 1 kHz)
 			tim_init.TIM_Prescaler = 71;          // PSC = 71 -> clk = 72MHz/72 = 1 MHz
 			tim_init.TIM_Period = 999;            // ARR = 999 -> T = 1000 tick = 1 ms = 1 kHz
 			tim_init.TIM_CounterMode = TIM_CounterMode_Up;
 			TIM_TimeBaseInit(TIM1, &tim_init);
 
-			// 4. Cau hÏnh PWM cho CH1
-			oc_init.TIM_OCMode = TIM_OCMode_PWM1; // TIM_OCMode_PWM2; duty tang l‡m LED s·ng dan
+			// 4. Cau h√¨nh PWM cho CH1
+			oc_init.TIM_OCMode = TIM_OCMode_PWM1; // TIM_OCMode_PWM2; duty tang l√†m LED s√°ng dan
 																						// TIM_OCMode_PWM1; tat dan
 
 			oc_init.TIM_OutputState = TIM_OutputState_Enable;
@@ -36,7 +70,7 @@ void config_TIMER_PWM(){
 			TIM_OC1Init(TIM1, &oc_init);
 			TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
 
-			// 5. Bat output chÌnh (MOE) vÏ TIM1 l‡ advanced timer
+			// 5. Bat output ch√≠nh (MOE) v√¨ TIM1 l√† advanced timer
 			TIM_CtrlPWMOutputs(TIM1, ENABLE);
 
 			// 6. Start Timer
@@ -49,7 +83,7 @@ int handle;
 };
 FILE __stdout;
 
-// Redirect h‡m fputc v? UART
+// Redirect h√†m fputc v? UART
 int fputc(int ch, FILE *f) {
     USART_SendData(USART1, (uint8_t) ch);
     while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
@@ -63,12 +97,13 @@ int main(void) {
     config_TIMER_PWM();
 		PIN_MODE_UART1();
     while (1) {
-//        for (duty = 0; duty <= 999; duty += 10) {
-//						
-//					printf("PWM: F = %d Hz, Duty = %d/1000 = %.1f%% \n", 1000, duty, duty/10.0);
-//					
-//					TIM1->CCR1 = duty;   // CCR1: gi· tri so s·nh cho kÍnh CH1.
-//								delay_ms(500);
-//        }   
+        for (duty = 0; duty <= 999; duty += 10) {
+						
+					printf("PWM: F = %d Hz, Duty = %d/1000 = %.1f%% \n", 1000, duty, duty/10.0);
+					
+					TIM1->CCR1 = duty;   // CCR1: gi√° tri so s√°nh cho k√™nh CH1.
+								delay_ms(300);
+        }   
 			}
 }
+
