@@ -60,8 +60,6 @@ void congfig_exti(){
 	
 };
 
-volatile uint8_t but_pre = 1;   
-volatile uint8_t but_last = 1; 
 volatile uint8_t led_state = 0;
 
 int i;
@@ -88,8 +86,7 @@ int main(){
 	while (1) {
 
 			}
-	
+}
 
-};
 
 
