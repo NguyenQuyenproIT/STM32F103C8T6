@@ -96,14 +96,27 @@ int duty;
 int main(void) {
     config_TIMER_PWM();
 		PIN_MODE_UART1();
+		duty = 300;
     while (1) {
-        for (duty = 0; duty <= 999; duty += 10) {
-						
+			TIM1->CCR1 = duty;   // CCR1: giá tri so sánh cho kênh CH1.
 					printf("PWM: F = %d Hz, Duty = %d/1000 = %.1f%% \n", 1000, duty, duty/10.0);
-					
-					TIM1->CCR1 = duty;   // CCR1: giá tri so sánh cho kênh CH1.
-								delay_ms(300);
-        }   
-			}
-}
+					delay_ms(500);
+//        for (duty = 0; duty <= 999; duty += 10) {
+//						
+//					printf("PWM: F = %d Hz, Duty = %d/1000 = %.1f%% \n", 1000, duty, duty/10.0);
+//					
+//					TIM1->CCR1 = duty;   // CCR1: giá tri so sánh cho kênh CH1.
+//								delay_ms(100);
+//        }   
+//				
+//				 for (duty = 999; duty >= 0; duty -= 10) {
+//					TIM1->CCR1 = duty;
+//					printf("PWM: F = %d Hz, Duty = %d/1000 = %.1f%% \n", 1000, duty, duty/10.0);
+//					delay_ms(100);
 
+//        if (duty == 0) break;  // tránh duty ve âm
+//				
+//				
+//			}
+				 }
+}
